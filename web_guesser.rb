@@ -2,35 +2,33 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'pry'
 
-number = rand(100)
+set :number, rand(100)
 
 get '/' do
-  guess = params["guess"].to_i
+  guess = params["guess"]
+  message = check_guess(guess)
 
-  message = ""
-  compare = [number, guess]
-  diff = compare.max - compare.min
-
-  if guess != 0
-    if guess > number
-      if diff > 5
-        message = "Way too high!"
-      else
-        message = "Too high!"
-      end
-    elsif guess < number
-      if diff > 5
-        message = "Way too low!"
-      else
-        message = "Too low!"
-      end
-    else
-      message = "You got it right!"
-    end
+  secret_message = nil
+  if settings.number == guess.to_i
+    secret_message = "The SECRET NUMBER is #{settings.number}"
   end
 
-  # throw params.inspect
-
-  erb :index, :locals => {:number => number,
+  erb :index, :locals => {:secret_message => secret_message,
                           :message => message}
+end
+
+def check_guess(guess)
+  guess = guess.to_i
+  message = ""
+  compare = [settings.number, guess]
+  diff = compare.max - compare.min
+
+  if guess > settings.number
+    diff > 5 ? message = "Way too high!" : message = "Too high!"
+  elsif guess < settings.number
+    diff > 5 ? message = "Way too low!" : message = "Too low!"
+  else
+    message = "You got it right!"
+  end
+  guess == 0 ? "" : message
 end
