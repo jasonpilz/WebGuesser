@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'sinatra/reloader'
 require 'pry'
+require 'tilt/erubis'
 
 set :number, rand(100)
 
@@ -8,11 +9,16 @@ get '/' do
   guess = params["guess"]
   message = check_guess(guess)
 
-  secret_message = nil
-  if settings.number == guess.to_i
-    secret_message = "The SECRET NUMBER is #{settings.number}"
+  cheat = params["cheat"]
+  cheat_mode = false
+  if cheat != nil
+    cheat_mode = true if cheat.include?("true")
   end
 
+  secret_message = nil
+  if (settings.number == guess.to_i) || (cheat_mode == true)
+    secret_message = "The SECRET NUMBER is #{settings.number}"
+  end
   erb :index, :locals => {:secret_message => secret_message,
                           :message => message}
 end
